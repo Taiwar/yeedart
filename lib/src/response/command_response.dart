@@ -10,6 +10,8 @@ class CommandResponse {
   /// If command is successfully executed, result will be returned.
   final List<dynamic> result;
 
+  final dynamic ackVal;
+
   /// If command fails, error will be returned.
   final Map<String, dynamic> error;
 
@@ -17,13 +19,15 @@ class CommandResponse {
     @required this.id,
     this.result,
     this.error,
+    this.ackVal
   });
 
   /// Creates [CommandResponse] from parsed JSON.
   CommandResponse.fromJson(Map<String, dynamic> parsed)
       : id = parsed['id'] as int,
         result = parsed['result'] as List,
-        error = parsed['error'] as Map<String, dynamic>;
+        error = parsed['error'] as Map<String, dynamic>,
+        ackVal = parsed['ackVal'] as dynamic;
 
   /// Indicates whether command was successfully executed or not.
   bool get hasError => error != null;
@@ -34,13 +38,14 @@ class CommandResponse {
   String _toJson() {
     return hasError
         ? json.encode(<String, dynamic>{
-            'id': id,
-            'error': error,
-          })
+      'id': id,
+      'error': error,
+    })
         : json.encode(<String, dynamic>{
-            'id': id,
-            'result': result,
-          });
+      'id': id,
+      'result': result,
+      'ackVal': ackVal
+    });
   }
 
   @override
@@ -52,7 +57,8 @@ class CommandResponse {
         other is CommandResponse &&
             runtimeType == other.runtimeType &&
             id == other.id &&
-            result.toString() == other.result.toString();
+            result.toString() == other.result.toString() &&
+            ackVal == other.ackVal;
   }
 
   @override

@@ -40,7 +40,20 @@ class TCPCommandSender implements CommandSender {
     socket.add(utf8.encode(command.message));
 
     await for (final data in _socketStream) {
-      final jsonMap = json.decode(utf8.decode(data)) as Map<String, dynamic>;
+      final res = utf8.decode(data);
+      Map<String, dynamic> jsonMap;
+
+      final lines = res.split('\r\n')
+          .where((r) => r.isNotEmpty)
+          .toList(growable: false);
+      // If there are more than 2 lines, the lamp also sent an ack object
+      if (lines.length == 2) {
+        jsonMap = json.decode(lines.first)
+          as Map<String, dynamic>;
+        jsonMap['ackVal'] = json.decode(lines[1])['params'];
+      } else {
+        jsonMap = json.decode(res) as Map<String, dynamic>;
+      }
       // print(jsonMap);
       response = CommandResponse.fromJson(jsonMap);
       break;
